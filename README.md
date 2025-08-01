@@ -13,13 +13,13 @@
 
 # Infinite Radio
 
-Infinite Radio generates endless music that automatically changes based on your current context. It combines the [Magenta RealTime](https://magenta.withgoogle.com/magenta-realtime) music model with contextual genre selection either from [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) or the top processes running on your machine.
+Infinite Radio generates endless music that automatically changes based on your current context. It combines the [Magenta RealTime](https://magenta.withgoogle.com/magenta-realtime) music model with contextual genre selection from either [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) or the top processes running on your machine.
 
 # Installation
 
 ## Prerequisites
 
-For running the music model locally, you will need:
+To run the music model locally, you will need the following:
 - **Docker** with GPU support
 - **NVIDIA GPU** with CUDA support
 - **[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)**
@@ -32,24 +32,26 @@ For running the music model locally, you will need:
    ```
 
 2. **Access the web interface:**
-   - Open your browser and navigate to `http://127.0.0.1:8080` or the IP where the music container is running
-   - Click the play button to start streaming
+   - Open your browser and navigate to `http://127.0.0.1:8080` or the IP where the music container is running.
+   - Click the play button to start streaming.
   
-## Running a DJ
+# Running a DJ
 
-## Option 1: Running the DJ on MacOS
+## Option 1: Running the DJ on macOS
 
-The Mac application can start the Process DJ or connect to the LLM DJ. It lives as a tray application to easily configure and examine the music control. **Note:** When using the Mac application, you may need to provide additional permissions to allow the DJ to examine your screen to dynamically select the genre.
+The macOS application can start the Process DJ or connect to the LLM DJ. It lives as a tray application to easily configure and examine the music control. 
+
+**Note:** When using the macOS application, you may need to provide additional permissions to allow the DJ to examine your screen to dynamically select the genre.
 
 1. **Download the latest release:**
-   - Go to the releases page and download the [latest version](https://github.com/LaurieWired/InfiniteRadio/releases/download/v1.0/InfiniteRadio.zip)
-   - Run the .app file and Infinite Radio will appear in your tray
+   - Go to the releases page and download the [latest version](https://github.com/LaurieWired/InfiniteRadio/releases/download/v1.0/InfiniteRadio.zip).
+   - Run the .app file, and Infinite Radio will appear in your tray.
 
-2. **Configure to point to the IP and port of the music model**
+2. **Configure the application to point to the IP and port of the music model.**
 
-3. **Select and run your DJ of choice**
-   - You can run the process DJ immediately or choose the LLM DJ
-   - If selecting the LLM DJ, ensure the model server is running already in [LM Studio](https://lmstudio.ai) (See *Option 3* below for an example although you may skip the python step when using the Mac app)
+3. **Select and run your DJ of choice:**
+   - You can run the process DJ immediately or choose the LLM DJ.
+   - If selecting the LLM DJ, ensure the model server is already running in [LM Studio](https://lmstudio.ai). (See *Option 3* below for an example, although you may skip the Python step when using the macOS app).
 
 ## Option 2: Running Process DJ with Python
 
@@ -64,8 +66,8 @@ python process_dj.py 127.0.0.1 8080 # Point this to the IP and port of the music
 The LLM DJ analyzes the data on your screen to automatically configure the genre that best suits your activity.
 
 1. **Run the LLM in LM Studio:**
-   - Download [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) (or any image to text model)
-   - Start the server in LM Studio
+   - Download [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) (or any image-to-text model).
+   - Start the server in LM Studio.
   
 <img src="images/lm_studio.png" alt="lm_studio" width="400"/>
 
@@ -96,9 +98,19 @@ curl http://localhost:8080/current-genre
 
 # Building
 
-Building the Mac application:
+Building the macOS application:
 
 ```
 pip install py2app jaraco.text setuptools
 python3 setup.py py2app
+```
+
+# Troubleshooting
+
+- **Error: `docker: command not found`**
+  - Make sure Docker is installed and running.
+- **Error: `nvidia-container-cli: initialization error`**
+  - Ensure the NVIDIA Container Toolkit is installed correctly and that your GPU drivers are up to date.
+- **The web interface is not loading.**
+  - Verify that the Docker container is running and that there are no port conflicts on `8080`.
 ```
