@@ -20,6 +20,7 @@ Infinite Radio generates endless music that automatically changes based on your 
 ## Prerequisites
 
 For running the music model locally, you will need:
+
 - **Docker** with GPU support
 - **NVIDIA GPU** with CUDA support
 - **[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)**
@@ -27,6 +28,7 @@ For running the music model locally, you will need:
 ## Music Model
 
 1. **Run the Docker Container from [Dockerhub](https://hub.docker.com/repository/docker/lauriewired/musicbeats/general):**
+
    ```bash
    docker run --gpus all --network host lauriewired/musicbeats:latest
    ```
@@ -34,7 +36,7 @@ For running the music model locally, you will need:
 2. **Access the web interface:**
    - Open your browser and navigate to `http://127.0.0.1:8080` or the IP where the music container is running
    - Click the play button to start streaming
-  
+
 ## Running a DJ
 
 ## Option 1: Running the DJ on MacOS
@@ -42,6 +44,7 @@ For running the music model locally, you will need:
 The Mac application can start the Process DJ or connect to the LLM DJ. It lives as a tray application to easily configure and examine the music control. **Note:** When using the Mac application, you may need to provide additional permissions to allow the DJ to examine your screen to dynamically select the genre.
 
 1. **Download the latest release:**
+
    - Go to the releases page and download the [latest version](https://github.com/LaurieWired/InfiniteRadio/releases/download/v1.0/InfiniteRadio.zip)
    - Run the .app file and Infinite Radio will appear in your tray
 
@@ -49,7 +52,7 @@ The Mac application can start the Process DJ or connect to the LLM DJ. It lives 
 
 3. **Select and run your DJ of choice**
    - You can run the process DJ immediately or choose the LLM DJ
-   - If selecting the LLM DJ, ensure the model server is running already in [LM Studio](https://lmstudio.ai) (See *Option 3* below for an example although you may skip the python step when using the Mac app)
+   - If selecting the LLM DJ, ensure the model server is running already in [LM Studio](https://lmstudio.ai) (See _Option 3_ below for an example although you may skip the python step when using the Mac app)
 
 ## Option 2: Running Process DJ with Python
 
@@ -66,12 +69,27 @@ The LLM DJ analyzes the data on your screen to automatically configure the genre
 1. **Run the LLM in LM Studio:**
    - Download [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) (or any image to text model)
    - Start the server in LM Studio
-  
+
 <img src="images/lm_studio.png" alt="lm_studio" width="400"/>
 
 2. **Run the Python Connection:**
    ```bash
    python llm_dj.py 127.0.0.1 8080 # Point this to the IP and port of the music model
+   ```
+
+## Option 4: Running the LLM DJ with Ollama (Alternative)
+
+The Ollama DJ provides the same functionality as LM Studio but with a lighter, easier-to-use local LLM server.
+
+1. **Pull the InternVL3 model:**
+
+   ```bash
+   ollama run hf.co/mradermacher/InternVL3-2B-GGUF:Q8_0
+   ```
+
+2. **Run the Python Connection:**
+   ```bash
+   python ollama_dj.py 127.0.0.1 8080 # Point this to the IP and port of the music model
    ```
 
 # API Reference
