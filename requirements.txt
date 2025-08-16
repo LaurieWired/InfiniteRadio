@@ -1,10 +1,8 @@
-rumps
+pystray
 psutil
-requests 
+requests
 mss
 Pillow
 openai
 certifi
 httpx
-pyobjc-core
-pyobjc-framework-Quartz 

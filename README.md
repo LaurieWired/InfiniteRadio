@@ -15,66 +15,79 @@
 
 Infinite Radio generates endless music that automatically changes based on your current context. It combines the [Magenta RealTime](https://magenta.withgoogle.com/magenta-realtime) music model with contextual genre selection either from [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) or the top processes running on your machine.
 
-# Installation
+This version has been adapted to run on **Windows with AMD GPUs** via ROCm in a Docker container.
+
+# Installation & Usage
+
+This setup uses a Linux Docker container for the heavy-lifting (the music model) and a native Windows application for control.
 
 ## Prerequisites
 
-For running the music model locally, you will need:
-- **Docker** with GPU support
-- **NVIDIA GPU** with CUDA support
-- **[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)**
+1.  A **Windows** machine with a modern **AMD GPU** and its latest drivers installed.
+2.  **Docker Desktop for Windows** installed and configured to use the **WSL2 backend**.
 
-## Music Model
+## Step 1: Build the Music Server Container
 
-1. **Run the Docker Container from [Dockerhub](https://hub.docker.com/repository/docker/lauriewired/musicbeats/general):**
-   ```bash
-   docker run --gpus all --network host lauriewired/musicbeats:latest
-   ```
+The container has the machine learning model and the music server.
 
-2. **Access the web interface:**
-   - Open your browser and navigate to `http://127.0.0.1:8080` or the IP where the music container is running
-   - Click the play button to start streaming
-  
-## Running a DJ
+1.  Open a terminal (PowerShell or Command Prompt).
+2.  Navigate into the `MusicContainer` directory:
+    ```sh
+    cd MusicContainer
+    ```
+3.  Build the Docker image. This might take a while as it downloads the ROCm environment and the ML models.
+    ```sh
+    docker build -t infinite-radio-rocm .
+    ```
 
-## Option 1: Running the DJ on MacOS
+## Step 2: Run the Music Server Container
 
-The Mac application can start the Process DJ or connect to the LLM DJ. It lives as a tray application to easily configure and examine the music control. **Note:** When using the Mac application, you may need to provide additional permissions to allow the DJ to examine your screen to dynamically select the genre.
+1.  Run the container and expose the necessary GPU devices and network port:
+    ```sh
+    docker run --rm -it -p 8080:8080 --device=/dev/kfd --device=/dev/dri infinite-radio-rocm
+    ```
+    *   The `--device` flags are crucial for giving the Linux container access to your AMD GPU from the Windows host.
+    *   You should see output from `supervisord` indicating the servers have started.
 
-1. **Download the latest release:**
-   - Go to the releases page and download the [latest version](https://github.com/LaurieWired/InfiniteRadio/releases/download/v1.0/InfiniteRadio.zip)
-   - Run the .app file and Infinite Radio will appear in your tray
+## Step 3: Run the Windows UI Controller
 
-2. **Configure to point to the IP and port of the music model**
+This is the system tray application that controls the DJ.
 
-3. **Select and run your DJ of choice**
-   - You can run the process DJ immediately or choose the LLM DJ
-   - If selecting the LLM DJ, ensure the model server is running already in [LM Studio](https://lmstudio.ai) (See *Option 3* below for an example although you may skip the python step when using the Mac app)
+1.  Open a **new** terminal on your Windows machine.
+2.  Navigate to the root directory of the project (the one containing `windows_app.py`).
+3.  (Recommended) Create and activate a Python virtual environment:
+    ```sh
+    python -m venv venv
+    .\venv\Scripts\activate
+    ```
+4.  Install the required Python packages:
+    ```sh
+    pip install -r requirements.txt
+    ```
+5.  Run the application:
+    ```sh
+    python windows_app.py
+    ```
 
-## Option 2: Running Process DJ with Python
+## Step 4: Usage
 
-The Process DJ will monitor the processes on your system and automatically change music genres based on what applications are most active.
+1.  An "Infinite Radio" icon will appear in your Windows system tray.
+2.  Right-click the icon and go to **Settings > Configure Server...**.
+3.  Enter `127.0.0.1:8080` and click Save.
+4.  You can now select a **DJ Type** (Process or LLM) and click **Start ... DJ**.
+5.  A console window will pop up showing the log output from the selected DJ script. You can also view this from the "Show Console" menu item.
 
-```bash
-python process_dj.py 127.0.0.1 8080 # Point this to the IP and port of the music model
-```
+### Using the LLM DJ
 
-## Option 3: Running the LLM DJ with Python
+If you choose the LLM DJ, you must also run a local LLM server that the DJ can connect to.
 
-The LLM DJ analyzes the data on your screen to automatically configure the genre that best suits your activity.
-
-1. **Run the LLM in LM Studio:**
-   - Download [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) (or any image to text model)
-   - Start the server in LM Studio
-  
-<img src="images/lm_studio.png" alt="lm_studio" width="400"/>
-
-2. **Run the Python Connection:**
-   ```bash
-   python llm_dj.py 127.0.0.1 8080 # Point this to the IP and port of the music model
-   ```
+1.  Download a vision model like [InternVL3](https://huggingface.co/OpenGVLab/InternVL3-2B) in [LM Studio](https://lmstudio.ai).
+2.  Start the server in LM Studio.
+3.  The `llm_dj.py` script is hardcoded to connect to `http://localhost:1234/v1`, which is the default for LM Studio.
 
 # API Reference
+
+The music server exposes a simple API to control the genre.
 
 ## Change Genre
 
@@ -94,11 +107,6 @@ curl -X POST http://localhost:8080/genre \
 curl http://localhost:8080/current-genre
 ```
 
-# Building
+# Acknowledgements
 
-Building the Mac application:
-
-```
-pip install py2app jaraco.text setuptools
-python3 setup.py py2app
-```
+A huge thank you to the original author, **LaurieWired**, for creating this amazing project. This fork was created to adapt the original vision to run on AMD hardware under Windows.

@@ -1,9 +1,11 @@
-FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
+FROM rocm/dev-ubuntu-22.04
 
 # Avoid prompts during package installs
 ENV DEBIAN_FRONTEND=noninteractive
 
 # System packages
+# The ROCm base image includes many dev tools, but we ensure specific ones are present.
+# build-essential and cmake are included to ensure Python packages with C extensions can compile.
 RUN apt update && apt install -y \
   python3.10 python3.10-venv python3.10-dev python3.10-distutils \
   build-essential cmake git curl wget \
@@ -24,19 +26,19 @@ COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt
 
-# Clone Magenta Realtime and install with GPU extras
+# Clone Magenta Realtime and install base version (no GPU extras)
 RUN git clone https://github.com/magenta/magenta-realtime.git && \
     sed -i "s/DEFAULT_SOURCE = 'gcp'/DEFAULT_SOURCE = 'hf'/" magenta-realtime/magenta_rt/asset.py && \
-    pip install -e magenta-realtime/[gpu]
+    pip install -e magenta-realtime
 
-# Clean out conflicting TFs and reinstall specific nightlies
-RUN pip uninstall -y tensorflow tf-nightly tensorflow-cpu tf-nightly-cpu \
-    tensorflow-tpu tf-nightly-tpu tensorflow-hub tf-hub-nightly \
-    tensorflow-text tensorflow-text-nightly && \
-    pip install \
-      tf-nightly==2.20.0.dev20250619 \
-      tensorflow-text-nightly==2.20.0.dev20250316 \
-      tf-hub-nightly
+# Install ROCm-enabled TensorFlow and required dependencies.
+# WARNING: The original project used specific TensorFlow nightly builds.
+# Official ROCm-enabled nightly pip packages are not available.
+# We are therefore using the latest stable 'tensorflow-rocm' package.
+# This may cause compatibility issues with 'magenta-realtime'.
+# If issues arise, you may need to build TensorFlow from source against a
+# specific commit to match the original nightly version.
+RUN pip install tensorflow-rocm tensorflow-text tf-hub-nightly
 
 # Copy and run model setup script to pre-download models
 COPY setup_model.py .
